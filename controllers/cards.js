@@ -7,9 +7,9 @@ const getCards = (req, res) => {
     })
     .catch((err)=> {
       if(err instanceof mongoose.Error.ValidationError) {
-          res.status(400).send(err.message);
+          res.status(400).send({ message: 'Переданы некорректные данные при создании карточки.'});
       } else {
-          res.status(500).send(err.message)
+          res.status(500).send({ message: 'Ошибка на стороне сервера.'})
       }
   })
 }
@@ -24,9 +24,9 @@ const createCard = (req, res) => {
     })
     .catch((err)=> {
       if(err instanceof mongoose.Error.ValidationError) {
-          res.status(400).send(err.message);
+          res.status(400).send({ message: 'Переданы некорректные данные при создании карточки.'});
       } else {
-          res.status(500).send(err.message)
+          res.status(500).send({ message: 'Ошибка на стороне сервера.'})
       }
   })
 }
@@ -37,17 +37,15 @@ const deleteCard = (req, res) => {
 
   cardShema.findByIdAndRemove(cardId)
   .then(() => {
-      res.status(201).send({ message: 'карточка удалена' })
+      res.status(201).send({ message: 'карточка удалена.' })
   })
   .catch((err) => {
-      res.status(404).send(err.message);
+      res.status(404).send({ message: 'Карточка с указанным _id не найдена.'});
   });
 }
 
 
 const putCardLike = (req, res) => {
-
-
   cardShema.findByIdAndUpdate(
       req.params.cardId,
       { $addToSet: { likes: req.user._id } },
@@ -58,11 +56,11 @@ const putCardLike = (req, res) => {
     })
     .catch((err) => {
       if(err instanceof mongoose.Error.ValidationError) {
-        res.status(400).send(err.message);
+        res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
       } else if (err instanceof mongoose.Error.DocumentNotFoundError){
-        res.status(404).send(err.message);
+        res.status(404).send({ message: 'Передан несуществующий _id карточки.' });
       } else {
-        res.status(500).send(err.message);
+        res.status(500).send({ message: 'Ошибка на стороне сервера.'});
       }
     });
 };
@@ -79,11 +77,11 @@ const deleteCardLike = (req, res) => {
     })
     .catch((err) => {
       if(err instanceof mongoose.Error.ValidationError) {
-        res.status(400).send(err.message);
+        res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
       } else if (err instanceof mongoose.Error.DocumentNotFoundError){
-        res.status(404).send(err.message);
+        res.status(404).send({ message: 'Передан несуществующий _id карточки.' });
       } else {
-        res.status(500).send(err.message);
+        res.status(500).send({ message: 'Ошибка на стороне сервера.'});
       }
     });
 };
