@@ -17,7 +17,7 @@ const getUserById = (req, res) => {
   const { userId } = req.params;
 
   UserModel.findById(userId)
-    .then((user) => res.status(201).send(user))
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
         res.status(404).send({ message: 'Пользователь по указанному _id не найден.' });
@@ -27,7 +27,6 @@ const getUserById = (req, res) => {
     });
 };
 
-// 400 500
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   return UserModel.create({ name, about, avatar })
@@ -48,7 +47,7 @@ const updateUserProfile = (req, res) => {
 
   if (req.user._id) {
     UserModel.findByIdAndUpdate(req.user._id, { name, about }, { new: 'true', runValidaotrs: true })
-      .then((user) => res.status(201).send(user))
+      .then((user) => res.status(200).send(user))
       .catch((err) => {
         if (err instanceof mongoose.Error.ValidationError) {
           res.status(400).send({ message: 'Переданы некорректные данные при обновлении профиля.' });

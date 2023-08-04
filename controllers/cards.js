@@ -3,7 +3,7 @@ const cardShema = require('../models/card');
 
 const getCards = (req, res) => {
   cardShema.find()
-    .then((cards) => res.status(201).send(cards))
+    .then((cards) => res.status(200).send(cards))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
         res.status(400).send({ message: 'Переданы некорректные данные при создании карточки.' });
