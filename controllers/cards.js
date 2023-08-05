@@ -1,14 +1,21 @@
 const mongoose = require('mongoose');
 const cardShema = require('../models/card');
 
+const ValidationErrorStatus = 400;
+const DocumentNotFoundErrorStatus = 404;
+const CastErrorStatus = 400;
+const ServerErrorStatus = 500;
+const OkStatus = 200;
+const CreatedStatus = 201;
+
 const getCards = (req, res) => {
   cardShema.find()
-    .then((cards) => res.status(200).send(cards))
+    .then((cards) => res.status(OkStatus).send(cards))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании карточки.' });
+        res.status(ValidationErrorStatus).send({ message: 'Переданы некорректные данные при создании карточки.' });
       } else {
-        res.status(500).send({ message: 'Ошибка на стороне сервера.' });
+        res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
       }
     });
 };
@@ -18,49 +25,38 @@ const createCard = (req, res) => {
   const owner = req.user._id;
   return cardShema.create({ name, link, owner })
     .then((card) => {
-      res.status(201).send(card);
+      res.status(CreatedStatus).send(card);
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        res.status(400).send({ message: 'Переданы некорректные данные при создании карточки.' });
+        res.status(ValidationErrorStatus).send({ message: 'Переданы некорректные данные при создании карточки.' });
       } else {
-        res.status(500).send({ message: 'Ошибка на стороне сервера.' });
+        res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
       }
     });
 };
-// Удаление карточки
-// 29. Код ответа равен 200
-// Удаление карточки с некорректным id
-// 30. Код ответа равен 400
-// Удаление карточки с несуществующим в БД id
-// 31. Код ответа равен 404
+
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
 
   cardShema.findByIdAndRemove(cardId)
     .orFail()
     .then(() => {
-      res.status(200).send({ message: 'карточка удалена.' });
+      res.status(OkStatus).send({ message: 'карточка удалена.' });
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        res.status(404).send({ message: 'DocumentNotFoundError' });
+        res.status(DocumentNotFoundErrorStatus).send({ message: 'DocumentNotFoundError' });
       } else if (err instanceof mongoose.Error.CastError) {
-        res.status(400).send({ message: 'CastError' });
+        res.status(CastErrorStatus).send({ message: 'CastError' });
       } else if (err instanceof mongoose.Error.ValidationError) {
-        res.status(400).send({ message: 'ValidationError' });
+        res.status(ValidationErrorStatus).send({ message: 'ValidationError' });
       } else {
-        res.status(500).send({ message: 'Ошибка на стороне сервера.' });
+        res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
       }
     });
 };
-// Добавление лайка с некорректным id карточки
-// 18. Код ответа равен 400
-// Добавление лайка с несуществующим в БД id карточки
-// 19. В ответе приходит JSON-объект
-//  20. Код ответа равен 404
-//  21. Проверка возврата поля message
-//  22. Ответ содержит message длинной больше 1 символа
+
 const putCardLike = (req, res) => {
   cardShema.findByIdAndUpdate(
     req.params.cardId,
@@ -68,28 +64,20 @@ const putCardLike = (req, res) => {
     { new: true },
   )
     .orFail()
-    .then((card) => res.status(201).send(card))
+    .then((card) => res.status(CreatedStatus).send(card))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+        res.status(ValidationErrorStatus).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
       } else if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        res.status(404).send({ message: 'Передан несуществующий _id карточки.' });
+        res.status(DocumentNotFoundErrorStatus).send({ message: 'Передан несуществующий _id карточки.' });
       } else if (err instanceof mongoose.Error.CastError) {
-        res.status(400).send({ message: 'CastError' });
+        res.status(CastErrorStatus).send({ message: 'CastError' });
       } else {
-        res.status(500).send({ message: 'Ошибка на стороне сервера.' });
+        res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
       }
     });
 };
-// Удаление лайка у карточки с некорректным id
-// 23. Код ответа равен 400
-// Удаление лайка у карточки с несуществующим в БД id
-// 24. В ответе приходит JSON-объект
-// 25. Код ответа равен 404
-// 26. Проверка возврата поля message
-// 27. Ответ содержит message длинной больше 1 символа
-// Удаление лайка у карточки
-//  28. Код ответа равен 200
+
 const deleteCardLike = (req, res) => {
   cardShema.findByIdAndUpdate(
     req.params.cardId,
@@ -97,16 +85,16 @@ const deleteCardLike = (req, res) => {
     { new: true },
   )
     .orFail()
-    .then((card) => res.status(200).send(card))
+    .then((card) => res.status(OkStatus).send(card))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
+        res.status(ValidationErrorStatus).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
       } else if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        res.status(404).send({ message: 'Передан несуществующий _id карточки.' });
+        res.status(DocumentNotFoundErrorStatus).send({ message: 'Передан несуществующий _id карточки.' });
       } else if (err instanceof mongoose.Error.CastError) {
-        res.status(400).send({ message: 'CastError' });
+        res.status(CastErrorStatus).send({ message: 'CastError' });
       } else {
-        res.status(500).send({ message: 'Ошибка на стороне сервера.' });
+        res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
       }
     });
 };
