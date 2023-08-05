@@ -1,6 +1,7 @@
+const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
-const path = require('path');
+
 const {
   PORT = 3000,
 } = process.env;
@@ -25,8 +26,8 @@ mongoose.connect(DB_URL, {
 });
 
 app.use('*', (req, res) => {
-  res.status(404).send({ message: 'страница не найдена.' })
-})
+  res.status(404).send({ message: 'страница не найдена.' });
+});
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
   console.log(`App listening on port ${PORT}`);
