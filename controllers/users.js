@@ -23,16 +23,17 @@ const getUserById = (req, res) => {
   const { userId } = req.params;
 
   UserModel.findById(userId)
+    .orFail()
     .then((user) => {
       res.status(200).send(user);
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        res.status(404).send({ message: err.message });
+        res.status(404).send({ message: 'DocumentNotFoundError' });
       } else if (err instanceof mongoose.Error.CastError) {
-        res.status(400).send({ message: err.message });
+        res.status(400).send({ message: 'CastError' });
       } else if (err instanceof mongoose.Error.ValidationError) {
-        res.status(400).send({ message: err.message });
+        res.status(400).send({ message: 'ValidationError' });
       } else {
         res.status(500).send({ message: 'Ошибка на стороне сервера.' });
       }
