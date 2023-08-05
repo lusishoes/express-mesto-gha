@@ -38,11 +38,20 @@ const deleteCard = (req, res) => {
   const { cardId } = req.params;
 
   cardShema.findByIdAndRemove(cardId)
+    .orFail()
     .then(() => {
-      res.status(201).send({ message: 'карточка удалена.' });
+      res.status(200).send({ message: 'карточка удалена.' });
     })
-    .catch(() => {
-      res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
+    .catch((err) => {
+      if (err instanceof mongoose.Error.DocumentNotFoundError) {
+        res.status(404).send({ message: 'DocumentNotFoundError' });
+      } else if (err instanceof mongoose.Error.CastError) {
+        res.status(400).send({ message: 'CastError' });
+      } else if (err instanceof mongoose.Error.ValidationError) {
+        res.status(400).send({ message: 'ValidationError' });
+      } else {
+        res.status(500).send({ message: 'Ошибка на стороне сервера.' });
+      }
     });
 };
 // Добавление лайка с некорректным id карточки
@@ -88,7 +97,7 @@ const deleteCardLike = (req, res) => {
     { new: true },
   )
     .orFail()
-    .then((card) => res.status(201).send(card))
+    .then((card) => res.status(200).send(card))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
         res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
