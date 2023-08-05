@@ -1,4 +1,4 @@
-const { default: mongoose } = require('mongoose');
+const mongoose = require('mongoose');
 const cardShema = require('../models/card');
 
 const getCards = (req, res) => {
@@ -28,7 +28,12 @@ const createCard = (req, res) => {
       }
     });
 };
-
+// Удаление карточки
+// 29. Код ответа равен 200
+//Удаление карточки с некорректным id
+// 30. Код ответа равен 400
+// Удаление карточки с несуществующим в БД id
+// 31. Код ответа равен 404
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
 
@@ -40,7 +45,13 @@ const deleteCard = (req, res) => {
       res.status(404).send({ message: 'Карточка с указанным _id не найдена.' });
     });
 };
-
+// Добавление лайка с некорректным id карточки
+// 18. Код ответа равен 400
+// Добавление лайка с несуществующим в БД id карточки
+// 19. В ответе приходит JSON-объект
+//  20. Код ответа равен 404
+//  21. Проверка возврата поля message
+//  22. Ответ содержит message длинной больше 1 символа
 const putCardLike = (req, res) => {
   cardShema.findByIdAndUpdate(
     req.params.cardId,
@@ -58,7 +69,15 @@ const putCardLike = (req, res) => {
       }
     });
 };
-
+//Удаление лайка у карточки с некорректным id
+//23. Код ответа равен 400
+//Удаление лайка у карточки с несуществующим в БД id
+// 24. В ответе приходит JSON-объект
+// 25. Код ответа равен 404
+// 26. Проверка возврата поля message
+// 27. Ответ содержит message длинной больше 1 символа
+// Удаление лайка у карточки
+//  28. Код ответа равен 200
 const deleteCardLike = (req, res) => {
   cardShema.findByIdAndUpdate(
     req.params.cardId,
