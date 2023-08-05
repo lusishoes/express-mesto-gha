@@ -23,7 +23,6 @@ const getUserById = (req, res) => {
   const { userId } = req.params;
 
   UserModel.findById(userId)
-    .orFail()
     .then((user) => {
       res.status(200).send(user);
     })
@@ -43,7 +42,6 @@ const getUserById = (req, res) => {
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   return UserModel.create({ name, about, avatar })
-    .orFail()
     .then((user) => {
       res.status(201).send(user);
     })
@@ -77,7 +75,6 @@ const updateUserProfile = (req, res) => {
   const { name, about } = req.body;
 
   UserModel.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .orFail()
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
