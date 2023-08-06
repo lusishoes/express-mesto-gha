@@ -1,13 +1,13 @@
-const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
+
+const DocumentNotFoundErrorStatus = 404;
 
 const {
   PORT = 3000,
 } = process.env;
 const DB_URL = 'mongodb://127.0.0.1:27017/mestodb';
 const app = express();
-const bodyParser = require('body-parser');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
@@ -17,16 +17,15 @@ app.use((req, res, next) => {
   };
   next();
 });
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(bodyParser.json());
-app.use(usersRouter);
-app.use(cardsRouter);
+app.use(express.json());
+app.use('/users', usersRouter);
+app.use('/cards', cardsRouter);
 mongoose.connect(DB_URL, {
   useNewUrlParser: true,
 });
 
 app.use('*', (req, res) => {
-  res.status(404).send({ message: 'страница не найдена.' });
+  res.status(DocumentNotFoundErrorStatus).send({ message: 'страница не найдена.' });
 });
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает

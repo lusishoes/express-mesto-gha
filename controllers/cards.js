@@ -11,12 +11,8 @@ const CreatedStatus = 201;
 const getCards = (req, res) => {
   cardShema.find()
     .then((cards) => res.status(OkStatus).send(cards))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        res.status(ValidationErrorStatus).send({ message: 'Переданы некорректные данные при создании карточки.' });
-      } else {
-        res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
-      }
+    .catch(() => {
+      res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
     });
 };
 
@@ -49,8 +45,6 @@ const deleteCard = (req, res) => {
         res.status(DocumentNotFoundErrorStatus).send({ message: 'DocumentNotFoundError' });
       } else if (err instanceof mongoose.Error.CastError) {
         res.status(CastErrorStatus).send({ message: 'CastError' });
-      } else if (err instanceof mongoose.Error.ValidationError) {
-        res.status(ValidationErrorStatus).send({ message: 'ValidationError' });
       } else {
         res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
       }
@@ -66,9 +60,7 @@ const putCardLike = (req, res) => {
     .orFail()
     .then((card) => res.status(CreatedStatus).send(card))
     .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        res.status(ValidationErrorStatus).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
-      } else if (err instanceof mongoose.Error.DocumentNotFoundError) {
+      if (err instanceof mongoose.Error.DocumentNotFoundError) {
         res.status(DocumentNotFoundErrorStatus).send({ message: 'Передан несуществующий _id карточки.' });
       } else if (err instanceof mongoose.Error.CastError) {
         res.status(CastErrorStatus).send({ message: 'CastError' });
@@ -87,9 +79,7 @@ const deleteCardLike = (req, res) => {
     .orFail()
     .then((card) => res.status(OkStatus).send(card))
     .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        res.status(ValidationErrorStatus).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' });
-      } else if (err instanceof mongoose.Error.DocumentNotFoundError) {
+      if (err instanceof mongoose.Error.DocumentNotFoundError) {
         res.status(DocumentNotFoundErrorStatus).send({ message: 'Передан несуществующий _id карточки.' });
       } else if (err instanceof mongoose.Error.CastError) {
         res.status(CastErrorStatus).send({ message: 'CastError' });
