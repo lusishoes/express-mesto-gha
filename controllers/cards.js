@@ -34,29 +34,31 @@ const createCard = (req, res) => {
 
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
-  cardShema.findOne({ _id: cardId})
-    .orFail(() => {
-      res.status(404).send({ message: 'ТАКОЙ КАРТОЧКИ НЕ СУЩЕСТВУЕТ' });
-    })
+  cardShema.findById(cardId)
     .then((card) => {
-      if(req.user._id === card.owner._id) {
-        cardShema.findByIdAndRemove(cardId)
-        .orFail()
-        .then(() => {
-          res.status(OkStatus).send({ message: 'карточка удалена.' });
-        })
-        .catch((err) => {
-          if (err instanceof mongoose.Error.DocumentNotFoundError) {
-            res.status(DocumentNotFoundErrorStatus).send({ message: 'DocumentNotFoundError' });
-          } else if (err instanceof mongoose.Error.CastError) {
-            res.status(CastErrorStatus).send({ message: 'CastError' });
-          } else {
-            res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
-          }
-        });
+      if(!card)  {
+        res.status(DocumentNotFoundErrorStatus).send({ message: 'Передан несуществующий _id карточки.' });
+      } else if(card.owner.toString() !== req.user._id) {
+        res.status(403).send({ message: 'Вы не являетесь владельцем карточки' });
       }
+      cardShema.findByIdAndRemove(cardId)
+      .orFail()
+      .then(() => {
+        res.status(OkStatus).send({ message: 'карточка удалена.' });
+      })
+      .catch((err) => {
+        if (err instanceof mongoose.Error.DocumentNotFoundError) {
+          res.status(DocumentNotFoundErrorStatus).send({ message: 'DocumentNotFoundError' });
+        } else if (err instanceof mongoose.Error.CastError) {
+          res.status(CastErrorStatus).send({ message: 'CastError' });
+        } else {
+          res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
+        }
+      });
     })
 };
+
+
 
 const putCardLike = (req, res) => {
   cardShema.findByIdAndUpdate(

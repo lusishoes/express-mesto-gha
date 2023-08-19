@@ -3,7 +3,9 @@ const mongoose = require('mongoose');
 const router = require('./routes/index');
 const { createUser, login } = require('./controllers/users')
 const DocumentNotFoundErrorStatus = 404;
-
+const {
+  validateUserCreation, validateUserLogin
+} = require('./middlewares/validation');
 const {
   PORT = 3000,
 } = process.env;
@@ -15,8 +17,8 @@ mongoose.connect(DB_URL, {
   useNewUrlParser: true,
 });
 
-app.post('/signin', login); // вход
-app.post('/signup', createUser); // регистрация
+app.post('/signin', validateUserLogin, login); // вход
+app.post('/signup', validateUserCreation, createUser); // регистрация
 
 app.use('*', (req, res) => {
   res.status(DocumentNotFoundErrorStatus).send({ message: 'страница не найдена.' });

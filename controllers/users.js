@@ -115,6 +115,22 @@ const login = (req, res) => {
     });
 };
 
+const getCurrentUserInfo = (req, res) => {
+  UserModel.findById(req.user._id)
+    .orFail()
+    .then((user)=>{
+      res.status(OkStatus).send(user);
+    })
+    .catch((err) => {
+      if (err instanceof mongoose.Error.DocumentNotFoundError) {
+        res.status(DocumentNotFoundErrorStatus).send({ message: 'DocumentNotFoundError' });
+      } else if (err instanceof mongoose.Error.CastError) {
+        res.status(CastErrorStatus).send({ message: 'CastError' });
+      } else {
+        res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
+      }
+    });
+}
 module.exports = {
   getUsers,
   getUserById,
@@ -122,4 +138,5 @@ module.exports = {
   updateUserProfile,
   updateUserAvatar,
   login,
+  getCurrentUserInfo
 };
