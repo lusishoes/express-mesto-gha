@@ -1,11 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const router = require('./routes/index');
-const { createUser, login } = require('./controllers/users')
-const DocumentNotFoundErrorStatus = 404;
+const { createUser, login } = require('./controllers/users');
 const {
-  validateUserCreation, validateUserLogin
+  validateUserCreation, validateUserLogin,
 } = require('./middlewares/validation');
+const NotFoundError = require('./errors/NotFoundError');
+
 const {
   PORT = 3000,
 } = process.env;
@@ -20,8 +21,18 @@ mongoose.connect(DB_URL, {
 app.post('/signin', validateUserLogin, login); // вход
 app.post('/signup', validateUserCreation, createUser); // регистрация
 
-app.use('*', (req, res) => {
-  res.status(DocumentNotFoundErrorStatus).send({ message: 'страница не найдена.' });
+app.use('*', () => Promise.reject(NotFoundError('Страница не найдена.')));
+
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
+  next();
 });
 
 app.listen(PORT, () => {

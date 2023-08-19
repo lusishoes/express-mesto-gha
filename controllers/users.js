@@ -1,24 +1,26 @@
 const mongoose = require('mongoose');
-const UserModel = require('../models/user');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const ValidationErrorStatus = 400;
-const DocumentNotFoundErrorStatus = 404;
-const CastErrorStatus = 400;
-const ServerErrorStatus = 500;
+const UserModel = require('../models/user');
+
 const OkStatus = 200;
 const CreatedStatus = 201;
 const SALT = 10;
+const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
+const ConfilctError = require('../errors/ConflictError');
+const ForbiddenError = require('../errors/ForbiddenError');
+
 // const SECRET_KEY = 'some-secret-key';
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   UserModel.find()
     .then((users) => res.status(OkStatus).send(users))
-    .catch(() => {
-      res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
+    .catch((err) => {
+      next(err);
     });
 };
 
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   const { userId } = req.params;
 
   UserModel.findById(userId)
@@ -28,39 +30,43 @@ const getUserById = (req, res) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        res.status(DocumentNotFoundErrorStatus).send({ message: 'DocumentNotFoundError' });
+        next(new NotFoundError('Передан несуществующий _id юзера.'));
       } else if (err instanceof mongoose.Error.CastError) {
-        res.status(CastErrorStatus).send({ message: 'CastError' });
+        next(new BadRequestError('CastError'));
       } else {
-        res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
+        next(err);
       }
     });
 };
 
-//return UserModel.create({ name, about, avatar, email, password })
-const createUser = (req, res) => {
-  const { name, about, avatar, email, password } = req.body;
+// return UserModel.create({ name, about, avatar, email, password })
+const createUser = (req, res, next) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
   bcrypt.hash(password, SALT)
-    .then(hash => UserModel.create({ name, about, avatar, email, password: hash }))
+    .then((hash) => UserModel.create({
+      name, about, avatar, email, password: hash,
+    }))
     .then((user) => res.status(CreatedStatus).send({
       name: user.name,
       about: user.about,
       avatar: user.avatar,
       _id: user._id,
-      email: user.email
+      email: user.email,
     }))
     .catch((err) => {
       if (err.code === 11000) {
-        res.status(409).send({ message: 'Пользователь с таким email уже существует' });
+        next(new ConfilctError('Пользователь с таким email уже существует'));
       } else if (err instanceof mongoose.Error.ValidationError) {
-        res.status(ValidationErrorStatus).send({ message: err.message });
+        next(new ForbiddenError('Переданы некорректные данные при создании пользователя.'));
       } else {
-        res.status(ServerErrorStatus).send({ message: err.message });
+        next(err);
       }
     });
 };
 
-const updateUserProfile = (req, res) => {
+const updateUserProfile = (req, res, next) => {
   const { name, about } = req.body;
 
   UserModel.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
@@ -68,32 +74,32 @@ const updateUserProfile = (req, res) => {
     .then((user) => res.status(OkStatus).send(user))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        res.status(ValidationErrorStatus).send({ message: err.message });
+        next(new ForbiddenError('Переданы некорректные данные при обновлении пользователя.'));
       } else if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        res.status(DocumentNotFoundErrorStatus).send({ message: 'Пользователь с указанным _id не найден.' });
+        next(new NotFoundError('Пользователь с указанным _id не найден.'));
       } else {
-        res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
+        next(err);
       }
     });
 };
 
-const updateUserAvatar = (req, res) => {
+const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   UserModel.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => res.status(OkStatus).send(user))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        res.status(ValidationErrorStatus).send({ message: 'Переданы некорректные данные при обновлении аватара.' });
+        next(new ForbiddenError('Переданы некорректные данные при обновлении аватара.'));
       } else if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        res.status(DocumentNotFoundErrorStatus).send({ message: 'Пользователь с указанным _id не найден.' });
+        next(new NotFoundError('Пользователь с указанным _id не найден.'));
       } else {
-        res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
+        next(err);
       }
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   return UserModel.findUserByCredentials(email, password)
@@ -102,35 +108,33 @@ const login = (req, res) => {
       const token = jwt.sign(
         { _id: user._id },
         'some-secret-key',
-        { expiresIn: '7d' } // токен будет просрочен через 7 дней после создания
+        { expiresIn: '7d' }, // токен будет просрочен через 7 дней после создания
       );
 
       // вернём токен
       res.send({ token });
     })
     .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
+      next(err);
     });
 };
 
-const getCurrentUserInfo = (req, res) => {
+const getCurrentUserInfo = (req, res, next) => {
   UserModel.findById(req.user._id)
     .orFail()
-    .then((user)=>{
+    .then((user) => {
       res.status(OkStatus).send(user);
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        res.status(DocumentNotFoundErrorStatus).send({ message: 'DocumentNotFoundError' });
+        next(new NotFoundError('Пользователь с указанным _id не найден.'));
       } else if (err instanceof mongoose.Error.CastError) {
-        res.status(CastErrorStatus).send({ message: 'CastError' });
+        next(new BadRequestError('CastError'));
       } else {
-        res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
+        next(err);
       }
     });
-}
+};
 module.exports = {
   getUsers,
   getUserById,
@@ -138,5 +142,5 @@ module.exports = {
   updateUserProfile,
   updateUserAvatar,
   login,
-  getCurrentUserInfo
+  getCurrentUserInfo,
 };
