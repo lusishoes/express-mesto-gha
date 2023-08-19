@@ -34,21 +34,28 @@ const createCard = (req, res) => {
 
 const deleteCard = (req, res) => {
   const { cardId } = req.params;
-
-  cardShema.findByIdAndRemove(cardId)
-    .orFail()
-    .then(() => {
-      res.status(OkStatus).send({ message: 'карточка удалена.' });
+  cardShema.findOne({ _id: cardId})
+    .orFail(() => {
+      res.status(404).send({ message: 'ТАКОЙ КАРТОЧКИ НЕ СУЩЕСТВУЕТ' });
     })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.DocumentNotFoundError) {
-        res.status(DocumentNotFoundErrorStatus).send({ message: 'DocumentNotFoundError' });
-      } else if (err instanceof mongoose.Error.CastError) {
-        res.status(CastErrorStatus).send({ message: 'CastError' });
-      } else {
-        res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
+    .then((card) => {
+      if(req.user._id === card.owner._id) {
+        cardShema.findByIdAndRemove(cardId)
+        .orFail()
+        .then(() => {
+          res.status(OkStatus).send({ message: 'карточка удалена.' });
+        })
+        .catch((err) => {
+          if (err instanceof mongoose.Error.DocumentNotFoundError) {
+            res.status(DocumentNotFoundErrorStatus).send({ message: 'DocumentNotFoundError' });
+          } else if (err instanceof mongoose.Error.CastError) {
+            res.status(CastErrorStatus).send({ message: 'CastError' });
+          } else {
+            res.status(ServerErrorStatus).send({ message: 'Ошибка на стороне сервера.' });
+          }
+        });
       }
-    });
+    })
 };
 
 const putCardLike = (req, res) => {

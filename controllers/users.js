@@ -1,13 +1,15 @@
 const mongoose = require('mongoose');
 const UserModel = require('../models/user');
-
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const ValidationErrorStatus = 400;
 const DocumentNotFoundErrorStatus = 404;
 const CastErrorStatus = 400;
 const ServerErrorStatus = 500;
 const OkStatus = 200;
 const CreatedStatus = 201;
-
+const SALT = 10;
+// const SECRET_KEY = 'some-secret-key';
 const getUsers = (req, res) => {
   UserModel.find()
     .then((users) => res.status(OkStatus).send(users))
@@ -35,14 +37,22 @@ const getUserById = (req, res) => {
     });
 };
 
+//return UserModel.create({ name, about, avatar, email, password })
 const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  return UserModel.create({ name, about, avatar })
-    .then((user) => {
-      res.status(CreatedStatus).send(user);
-    })
+  const { name, about, avatar, email, password } = req.body;
+  bcrypt.hash(password, SALT)
+    .then(hash => UserModel.create({ name, about, avatar, email, password: hash }))
+    .then((user) => res.status(CreatedStatus).send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      _id: user._id,
+      email: user.email
+    }))
     .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
+      if (err.code === 11000) {
+        res.status(409).send({ message: 'Пользователь с таким email уже существует' });
+      } else if (err instanceof mongoose.Error.ValidationError) {
         res.status(ValidationErrorStatus).send({ message: err.message });
       } else {
         res.status(ServerErrorStatus).send({ message: err.message });
@@ -83,10 +93,33 @@ const updateUserAvatar = (req, res) => {
     });
 };
 
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  return UserModel.findUserByCredentials(email, password)
+    .then((user) => {
+      // создадим токен
+      const token = jwt.sign(
+        { _id: user._id },
+        'some-secret-key',
+        { expiresIn: '7d' } // токен будет просрочен через 7 дней после создания
+      );
+
+      // вернём токен
+      res.send({ token });
+    })
+    .catch((err) => {
+      res
+        .status(401)
+        .send({ message: err.message });
+    });
+};
+
 module.exports = {
   getUsers,
   getUserById,
   createUser,
   updateUserProfile,
   updateUserAvatar,
+  login,
 };
