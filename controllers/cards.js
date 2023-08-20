@@ -34,9 +34,11 @@ const createCard = (req, res, next) => {
 const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   cardShema.findById(cardId)
-    .orFail(() => Promise.reject(new NotFoundError('Передан несуществующий _id карточки.')))
+    .orFail()
     .then((card) => {
-      if (card.owner.toString() !== req.user._id) {
+      if (!card) {
+        next(new NotFoundError('Передан несуществующий _id карточки.'));
+      } else if (card.owner.toString() !== req.user._id) {
         next(new ForbiddenError('Вы не являетесь владельцем карточки'));
       }
       cardShema.findByIdAndRemove(cardId)
