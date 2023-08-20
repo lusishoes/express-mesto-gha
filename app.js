@@ -25,6 +25,7 @@ app.post('/signup', validateUserCreation, createUser); // регистрация
 
 app.use('*', () => Promise.reject(NotFoundError('Страница не найдена.')));
 
+app.use(errors());
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res
@@ -36,7 +37,6 @@ app.use((err, req, res, next) => {
     });
   next();
 });
-app.use(errors());
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
   console.log(`App listening on port ${PORT}`);

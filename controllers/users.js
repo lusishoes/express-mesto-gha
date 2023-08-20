@@ -9,7 +9,6 @@ const SALT = 10;
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ConfilctError = require('../errors/ConflictError');
-const ForbiddenError = require('../errors/ForbiddenError');
 
 // const SECRET_KEY = 'some-secret-key';
 const getUsers = (req, res, next) => {
@@ -59,7 +58,7 @@ const createUser = (req, res, next) => {
       if (err.code === 11000) {
         next(new ConfilctError('Пользователь с таким email уже существует'));
       } else if (err instanceof mongoose.Error.ValidationError) {
-        next(new ForbiddenError('Переданы некорректные данные при создании пользователя.'));
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя.'));
       } else {
         next(err);
       }
@@ -74,7 +73,7 @@ const updateUserProfile = (req, res, next) => {
     .then((user) => res.status(OkStatus).send(user))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new ForbiddenError('Переданы некорректные данные при обновлении пользователя.'));
+        next(new BadRequestError('Переданы некорректные данные при обновлении пользователя.'));
       } else if (err instanceof mongoose.Error.DocumentNotFoundError) {
         next(new NotFoundError('Пользователь с указанным _id не найден.'));
       } else {
@@ -90,7 +89,7 @@ const updateUserAvatar = (req, res, next) => {
     .then((user) => res.status(OkStatus).send(user))
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new ForbiddenError('Переданы некорректные данные при обновлении аватара.'));
+        next(new BadRequestError('Переданы некорректные данные при обновлении аватара.'));
       } else if (err instanceof mongoose.Error.DocumentNotFoundError) {
         next(new NotFoundError('Пользователь с указанным _id не найден.'));
       } else {
@@ -128,8 +127,6 @@ const getCurrentUserInfo = (req, res, next) => {
     .catch((err) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
         next(new NotFoundError('Пользователь с указанным _id не найден.'));
-      } else if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequestError('CastError'));
       } else {
         next(err);
       }

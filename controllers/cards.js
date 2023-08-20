@@ -46,8 +46,8 @@ const deleteCard = (req, res, next) => {
           res.status(OkStatus).send({ message: 'карточка удалена.' });
         })
         .catch((err) => {
-          if (err instanceof mongoose.Error.CastError) {
-            next(new BadRequestError('CastError'));
+          if (err instanceof mongoose.Error.DocumentNotFoundError) {
+            next(new NotFoundError('Такой карточки не существует'));
           } else {
             next(err);
           }
