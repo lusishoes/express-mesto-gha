@@ -3,11 +3,7 @@ const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const bodyParser = require('body-parser');
 const router = require('./routes/index');
-const { createUser, login } = require('./controllers/users');
-const {
-  validateUserCreation, validateUserLogin,
-} = require('./middlewares/validation');
-const NotFoundError = require('./errors/NotFoundError');
+const errorHandler = require('./middlewares/error-handler');
 
 const {
   PORT = 3000,
@@ -20,20 +16,8 @@ mongoose.connect(DB_URL, {
   useNewUrlParser: true,
 });
 
-app.post('/signin', validateUserLogin, login); // вход
-app.post('/signup', validateUserCreation, createUser); // регистрация
-
-app.use('*', (req, res, next) => next(new NotFoundError('Страница не найдена.')));
 app.use(errors());
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-
-  res.status(statusCode).send({
-    message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
-  });
-
-  next();
-});
+app.use(errorHandler);
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
   console.log(`App listening on port ${PORT}`);

@@ -37,10 +37,12 @@ const deleteCard = (req, res, next) => {
     .then((card) => {
       if (!card) {
         next(new NotFoundError('Передан несуществующий _id карточки.'));
-      } else if (card.owner.toString() !== req.user._id) {
+        return;
+      } if (card.owner.toString() !== req.user._id) {
         next(new ForbiddenError('Вы не являетесь владельцем карточки'));
+        return;
       }
-      cardShema.findByIdAndRemove(cardId)
+      cardShema.deleteOne(card)
         .orFail()
         .then(() => {
           res.status(OkStatus).send({ message: 'карточка удалена.' });
