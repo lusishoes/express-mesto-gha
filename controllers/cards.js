@@ -34,7 +34,6 @@ const createCard = (req, res, next) => {
 const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   cardShema.findById(cardId)
-    .orFail()
     .then((card) => {
       if (!card) {
         next(new NotFoundError('Передан несуществующий _id карточки.'));
