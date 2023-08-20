@@ -27,7 +27,6 @@ app.use('*', () => Promise.reject(NotFoundError('Страница не найд�
 
 app.use(errors());
 app.use((err, req, res, next) => {
-  console.log(err);
   const { statusCode = 500, message } = err;
 
   res.status(statusCode).send({
