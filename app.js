@@ -27,14 +27,13 @@ app.use('*', () => Promise.reject(NotFoundError('Страница не найд�
 
 app.use(errors());
 app.use((err, req, res, next) => {
+  console.log(err);
   const { statusCode = 500, message } = err;
-  return res
-    .status(statusCode)
-    .send({
-      message: statusCode === 500
-        ? 'На сервере произошла ошибка'
-        : message,
-    });
+
+  res.status(statusCode).send({
+    message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
+  });
+
   next();
 });
 app.listen(PORT, () => {
