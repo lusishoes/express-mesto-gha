@@ -67,7 +67,7 @@ const putCardLike = (req, res, next) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
         next(new NotFoundError('Передан несуществующий _id карточки.'));
       } else if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequestError('CastError'));
+        next(new BadRequestError('Добавление лайка с некорректным id карточки'));
       } else {
         next(err);
       }
@@ -87,7 +87,7 @@ const deleteCardLike = (req, res, next) => {
       if (err instanceof mongoose.Error.DocumentNotFoundError) {
         next(new NotFoundError('Передан несуществующий _id карточки.'));
       } else if (err instanceof mongoose.Error.CastError) {
-        next(new BadRequestError('CastError'));
+        next(new BadRequestError('Удаление лайка у карточки с некорректным id'));
       } else {
         next(err);
       }
