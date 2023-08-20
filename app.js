@@ -23,10 +23,7 @@ mongoose.connect(DB_URL, {
 app.post('/signin', validateUserLogin, login); // вход
 app.post('/signup', validateUserCreation, createUser); // регистрация
 
-
-app.use('*', () => {
-  return Promise.reject(new NotFoundError('Страница не найдена.'))
-});
+app.use('*', (req, res, next) => next(new NotFoundError('Страница не найдена.')));
 app.use(errors());
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
