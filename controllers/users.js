@@ -81,7 +81,8 @@ const updateUserProfile = (req, res, next) => {
       }
     });
 };
-
+// Обновление аватара пользователя с некорректным url-адресом
+//  1. Ошибка валидации поймана при помощи Joi
 const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
 

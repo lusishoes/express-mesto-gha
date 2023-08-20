@@ -24,7 +24,7 @@ const createCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err instanceof mongoose.Error.ValidationError) {
-        next(new ForbiddenError('Переданы некорректные данные при создании карточки.'));
+        next(new BadRequestError('Переданы некорректные данные при создании карточки.'));
       } else {
         next(err);
       }
@@ -34,10 +34,9 @@ const createCard = (req, res, next) => {
 const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
   cardShema.findById(cardId)
+    .orFail(() => Promise.reject(new NotFoundError('Передан несуществующий _id карточки.')))
     .then((card) => {
-      if (!card) {
-        next(new NotFoundError('Передан несуществующий _id карточки.'));
-      } else if (card.owner.toString() !== req.user._id) {
+      if (card.owner.toString() !== req.user._id) {
         next(new ForbiddenError('Вы не являетесь владельцем карточки'));
       }
       cardShema.findByIdAndRemove(cardId)
@@ -54,7 +53,8 @@ const deleteCard = (req, res, next) => {
         });
     });
 };
-
+// Добавление лайка с некорректным id карточки
+//  1. Ошибка валидации поймана при помощи Joi
 const putCardLike = (req, res, next) => {
   cardShema.findByIdAndUpdate(
     req.params.cardId,
@@ -73,7 +73,8 @@ const putCardLike = (req, res, next) => {
       }
     });
 };
-
+// Удаление лайка у карточки с некорректным id
+//  1. Ошибка валидации поймана при помощи Joi
 const deleteCardLike = (req, res, next) => {
   cardShema.findByIdAndUpdate(
     req.params.cardId,
