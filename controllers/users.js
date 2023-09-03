@@ -1,15 +1,15 @@
+require('dotenv').config();
+const { NODE_ENV, JWT_SECRET } = process.env;
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const UserModel = require('../models/user');
-
 const OkStatus = 200;
 const CreatedStatus = 201;
 const SALT = 10;
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ConfilctError = require('../errors/ConflictError');
-
 // const SECRET_KEY = 'some-secret-key';
 const getUsers = (req, res, next) => {
   UserModel.find()
@@ -107,7 +107,7 @@ const login = (req, res, next) => {
       // создадим токен
       const token = jwt.sign(
         { _id: user._id },
-        'some-secret-key',
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '7d' }, // токен будет просрочен через 7 дней после создания
       );
 
