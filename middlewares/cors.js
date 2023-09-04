@@ -1,7 +1,9 @@
 // Массив доменов, с которых разрешены кросс-доменные запросы
 const allowedCors = [
   'http://lusishoes.students.nomoredomainsicu.ru/',
-  'localhost:3000'
+  'https://lusishoes.students.nomoredomainsicu.ru/',
+  'https://localhost:3000',
+  'http://localhost:3000'
 ];
 
 const cors = (req, res, next) => {
