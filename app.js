@@ -11,6 +11,7 @@ const {
   PORT=3000,
 } = process.env;
 const app = express();
+app.options('*', cors)
 app.use(cors);
 app.use(bodyParser.json());
 app.use(requestLogger);
