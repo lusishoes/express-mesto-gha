@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const bodyParser = require('body-parser');
 const router = require('./routes/index');
-const cors = require('./middlewares/cors')
+// const cors = require('./middlewares/cors');
 const errorHandler = require('./middlewares/error-handler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const {
@@ -12,7 +12,14 @@ const {
 } = process.env;
 
 const app = express();
-app.use(cors);
+const corsOptions = {
+  origin: '*',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+};
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(requestLogger);
 app.use(router);
