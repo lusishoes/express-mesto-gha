@@ -14,8 +14,8 @@ const {
 
 const app = express();
 const allowedCors = [
-  'http://lusishoes.students.nomoredomainsicu.ru/',
-  'https://lusishoes.students.nomoredomainsicu.ru/',
+  'http://lusishoes.students.nomoredomainsicu.ru',
+  'https://lusishoes.students.nomoredomainsicu.ru',
   'https://localhost:3000',
   'http://localhost:3000',
 ];
