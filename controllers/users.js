@@ -1,9 +1,11 @@
 require('dotenv').config();
+
 const { NODE_ENV, JWT_SECRET } = process.env;
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const UserModel = require('../models/user');
+
 const OkStatus = 200;
 const CreatedStatus = 201;
 const SALT = 10;
@@ -101,7 +103,6 @@ const updateUserAvatar = (req, res, next) => {
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  console.log(email, password)
   return UserModel.findUserByCredentials(email, password)
     .then((user) => {
       // создадим токен
@@ -110,7 +111,6 @@ const login = (req, res, next) => {
         NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '7d' }, // токен будет просрочен через 7 дней после создания
       );
-        console.log(token)
       // вернём токен
       res.send({ token });
     })
