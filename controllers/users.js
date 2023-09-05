@@ -101,7 +101,7 @@ const updateUserAvatar = (req, res, next) => {
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-
+  console.log(email, password)
   return UserModel.findUserByCredentials(email, password)
     .then((user) => {
       // создадим токен
@@ -110,7 +110,7 @@ const login = (req, res, next) => {
         NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
         { expiresIn: '7d' }, // токен будет просрочен через 7 дней после создания
       );
-
+        console.log(token)
       // вернём токен
       res.send({ token });
     })

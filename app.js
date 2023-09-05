@@ -1,4 +1,5 @@
 require('dotenv').config();
+const cors = require('cors');
 const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
@@ -8,12 +9,18 @@ const router = require('./routes/index');
 const errorHandler = require('./middlewares/error-handler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const {
-  PORT=3000,
+  PORT=3001,
 } = process.env;
 
 const app = express();
+const allowedCors = [
+  'http://lusishoes.students.nomoredomainsicu.ru/',
+  'https://lusishoes.students.nomoredomainsicu.ru/',
+  'https://localhost:3000',
+  'http://localhost:3000',
+];
 const corsOptions = {
-  origin: '*',
+  origin: allowedCors,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: ['Content-Type', 'Authorization'],
   preflightContinue: false,

@@ -3,7 +3,9 @@ const allowedCors = [
   'http://lusishoes.students.nomoredomainsicu.ru/',
   'https://lusishoes.students.nomoredomainsicu.ru/',
   'https://localhost:3000',
-  'http://localhost:3000'
+  'http://localhost:3000',
+  'https://api.lusishoes.students.nomoredomainsicu.ru',
+  'http://api.lusishoes.students.nomoredomainsicu.ru'
 ];
 
 const cors = (req, res, next) => {
