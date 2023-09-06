@@ -30,15 +30,15 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(requestLogger);
-app.use(router);
-app.use(errorLogger);
-mongoose.connect(DB_URL, {
-  useNewUrlParser: true,
-});
 app.get('/crash-test', () => {
   setTimeout(() => {
     throw new Error('Сервер сейчас упадёт');
   }, 0);
+});
+app.use(router);
+app.use(errorLogger);
+mongoose.connect(DB_URL, {
+  useNewUrlParser: true,
 });
 app.use(errors());
 app.use(errorHandler);
